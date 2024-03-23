@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">AesEncryption</string>
+    <string name="encrypt">Encrypt</string>
+    <string name="decrypt">Decrypt</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="add_file">Add File</string>
+    <string name="choose_secret_key_size">Choose secret key size</string>
+    <string name="save_file">Save file</string>
+    <string name="plaintext">Plaintext</string>
+    <string name="ciphertext">Ciphertext</string>
+    <string name="choose_file">Choose file</string>
+    <string name="time_taken">Time taken : </string>
+    <string name="file_icon">file_icon</string>
+    <string name="delete_file">delete_file</string>
+</resources>
