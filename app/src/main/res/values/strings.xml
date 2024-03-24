@@ -4,7 +4,8 @@
     <string name="decrypt">Decrypt</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
-    <string name="add_file">Add File</string>
+    <string name="open_folder">Open folder</string>
+    <string name="add_file">Add file</string>
     <string name="choose_secret_key_size">Choose secret key size</string>
     <string name="save_file">Save file</string>
     <string name="plaintext">Plaintext</string>
@@ -13,4 +14,6 @@
     <string name="time_taken">Time taken : </string>
     <string name="file_icon">file_icon</string>
     <string name="delete_file">delete_file</string>
+    <string name ="file_name">File name</string>
+    <string name="file_content">File content</string>
 </resources>

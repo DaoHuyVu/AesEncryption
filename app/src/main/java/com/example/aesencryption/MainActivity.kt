@@ -2,15 +2,11 @@ package com.example.aesencryption
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
+import android.view.Menu
+import android.view.MenuItem
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.Lifecycle
-import androidx.navigation.NavController
-import androidx.navigation.NavDestination
-import androidx.navigation.fragment.NavHostFragment
-import androidx.navigation.ui.NavigationUI
-import androidx.navigation.ui.setupWithNavController
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
 import com.example.aesencryption.databinding.ActivityMainBinding
@@ -32,6 +28,23 @@ class MainActivity : AppCompatActivity() {
         TabLayoutMediator(tabLayout,viewPager){ tab,position ->
             tab.text = tabName[position]
         }.attach()
+        setSupportActionBar(binding.toolBar)
+
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.bottom_menu,menu)
+        return super.onCreateOptionsMenu(menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when(item.itemId){
+            R.id.add_file -> showDialogFragment()
+        }
+        return super.onOptionsItemSelected(item)
+    }
+    private fun showDialogFragment(){
+        AddFileDialogFragment().show(supportFragmentManager,"AddFileDialogFragment")
     }
     class AesAdapter(
         fragmentManager : FragmentManager,

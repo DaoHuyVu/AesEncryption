@@ -12,13 +12,17 @@ abstract class AES : EnDecAlgorithm {
         192 to "8e73b0f7da0e6452c810f32b809079e562f8ead2522c6b7b",
         256 to "ec26d4ee1eccbda8b659cbb1220a94c9491e7386ea9b53930001e49f165c57b2"
     )
-    private val keyMap = mapOf(16 to 44,24 to 52,32 to 60)
+    private val numOfRoundKeyMap = mapOf(16 to 44,24 to 52,32 to 60)
     private val roundMap = mapOf(16 to 10,24 to 12,32 to 14)
-    private val keyLength = secretKey.length/2
-    protected val numOfRound = roundMap[keyLength]!!
-    private val word = Array(keyMap[keyLength]!!){Array(4){0} }
+
+    private var keyLength = secretKey.length/2
+    protected var numOfRound = roundMap[keyLength]!!
+    private var word = Array(numOfRoundKeyMap[keyLength]!!){Array(4){0} }
     fun setKeySize(size : Int){
         secretKey = secretKeyMap[size]!!
+        keyLength = secretKey.length/2
+        numOfRound = roundMap[keyLength]!!
+        word =  Array(numOfRoundKeyMap[keyLength]!!){Array(4){0} }
     }
 
     private fun throughSBox(value : Int) : Int{
@@ -189,7 +193,7 @@ abstract class AES : EnDecAlgorithm {
                 word[i][j] = "${secretKey[2*(4*i+j)]}${secretKey[2*(4*i+j)+1]}".toInt(16)
             }
         }
-        for(i in keyLength/4 until keyMap[keyLength]!!){
+        for(i in keyLength/4 until numOfRoundKeyMap[keyLength]!!){
             for(j in 0 until 4){
                 var temp = word[i-1]
                 if(i%(keyLength/4) == 0){

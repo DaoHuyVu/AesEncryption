@@ -27,7 +27,7 @@ class FileItemAdapter(
             binding.deleteButton.setOnClickListener {
                 delete.invoke(position,fileName)
             }
-            binding.deleteButton.setOnClickListener {
+            binding.root.setOnClickListener {
                 choose.invoke(fileName)
             }
         }

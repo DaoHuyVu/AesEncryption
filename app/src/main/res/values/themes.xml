@@ -6,4 +6,5 @@
     </style>
 
     <style name="Theme.AesEncryption" parent="Base.Theme.AesEncryption" />
+
 </resources>

@@ -7,7 +7,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import com.example.aesencryption.databinding.FragmentDecryptionBinding
-import com.example.aesencryption.databinding.FragmentEncryptionBinding
 import java.io.File
 
 class DecryptionFragment : Fragment() {
@@ -16,9 +15,7 @@ class DecryptionFragment : Fragment() {
     private lateinit var decryptDir : String
     private var _binding : FragmentDecryptionBinding? = null
     private val binding get() =  _binding!!
-    private val secretKeySize = listOf("128","192","256")
-    private lateinit var pickedFile : String
-    private val files = mutableListOf("Choose a file")
+    private var pickedFile : String? = null
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -39,41 +36,36 @@ class DecryptionFragment : Fragment() {
     }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val filesDir = File(context?.filesDir,decryptDir)
-        filesDir.listFiles()?.map{ file ->
-            files.add(file.name)
-        }?.toList()
-
-        val keySizeAdapter = createArrayAdapter(secretKeySize)
-        val fileAdapter = createArrayAdapter(files)
         binding.apply{
-            keySizePicker.adapter = keySizeAdapter
-            keySizePicker.onItemSelectedListener = spinnerListener{
-                aes.setKeySize(secretKeySize[it].toInt())
-            }
-            filePicker.onItemSelectedListener = spinnerListener {
-                pickedFile = files[it]
-                inputEditText.setText(getFileContent(decryptDir,pickedFile))
-            }
-            filePicker.adapter = fileAdapter
             encryptButton.setOnClickListener{
                 val start = System.currentTimeMillis()
                 output.setText(aes.decrypt(inputEditText.text.toString()))
                 timeTaken.text = (System.currentTimeMillis()-start).toString()
             }
             save.setOnClickListener{
-                File("${requireContext().filesDir}/$encryptDir","$pickedFile-decrypt").apply {
-                    if(exists()){
-                        delete()
-                    }
-                    if(createNewFile()){
-                        writeText(output.text.toString())
-                        Toast.makeText(requireContext(),"Added to Encrypt directory", Toast.LENGTH_SHORT).show()
-                    }
-                    else{
-                        Toast.makeText(requireContext(),"Add failed", Toast.LENGTH_SHORT).show()
+                if(pickedFile != null){
+                    File("${requireContext().filesDir}/$encryptDir","$pickedFile-encrypt").apply {
+                        if(exists()){
+                            delete()
+                        }
+                        if(createNewFile()){
+                            writeText(output.text.toString())
+                            Toast.makeText(requireContext(),"Added to Encrypt directory", Toast.LENGTH_SHORT).show()
+                        }
+                        else{
+                            Toast.makeText(requireContext(),"Add failed", Toast.LENGTH_SHORT).show()
+                        }
                     }
                 }
+                else{
+                    Toast.makeText(requireContext(),"Pick a file first",Toast.LENGTH_SHORT).show()
+                }
+            }
+            openFolder.setOnClickListener{
+                FileChooserBottomSheetFragment(DECRYPT_DIR){ fileName ->
+                    pickedFile = fileName
+                    inputEditText.setText(getFileContent(decryptDir,fileName))
+                }.show(childFragmentManager,"BottomFragment")
             }
         }
     }

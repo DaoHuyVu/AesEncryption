@@ -26,9 +26,7 @@ fun spinnerListener(
             position: Int,
             id: Long
         ) {
-            if(position != 0){
-                action.invoke(position)
-            }
+            action.invoke(position)
         }
         override fun onNothingSelected(parent: AdapterView<*>?) {}
     }

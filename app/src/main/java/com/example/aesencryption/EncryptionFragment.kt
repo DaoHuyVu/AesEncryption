@@ -17,7 +17,6 @@ class EncryptionFragment : Fragment() {
     private val binding get() =  _binding!!
     private val secretKeySize = listOf("128","192","256")
     private var pickedFile: String? = null
-    private val files = mutableListOf("Choose a file")
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -39,10 +38,6 @@ class EncryptionFragment : Fragment() {
     }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val filesDir = File(context?.filesDir,encryptDir)
-        filesDir.listFiles()?.map{ file ->
-            files.add(file.name)
-        }?.toList()
         val keySizeAdapter = createArrayAdapter(secretKeySize)
         binding.apply{
             keySizePicker.adapter = keySizeAdapter
@@ -58,6 +53,9 @@ class EncryptionFragment : Fragment() {
             save.setOnClickListener{
                 if(pickedFile != null){
                     File("${requireContext().filesDir}/$decryptDir","$pickedFile-encrypt").apply {
+                        if(exists()){
+                            delete()
+                        }
                         if(createNewFile()){
                             writeText(output.text.toString())
                             Toast.makeText(requireContext(),"Added to Decrypt directory", Toast.LENGTH_SHORT).show()
@@ -71,8 +69,8 @@ class EncryptionFragment : Fragment() {
                     Toast.makeText(requireContext(),"Pick a file first",Toast.LENGTH_SHORT).show()
                 }
             }
-            add.setOnClickListener{
-                FileChooserBottomSheetFragment{ fileName ->
+            openFolder.setOnClickListener{
+                FileChooserBottomSheetFragment(ENCRYPT_DIR){ fileName ->
                     pickedFile = fileName
                     inputEditText.setText(getFileContent(encryptDir,fileName))
                 }.show(childFragmentManager,"BottomFragment")
