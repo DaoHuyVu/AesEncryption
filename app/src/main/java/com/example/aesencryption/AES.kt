@@ -25,24 +25,12 @@ abstract class AES : EnDecAlgorithm {
         word =  Array(numOfRoundKeyMap[keyLength]!!){Array(4){0} }
     }
 
-    private fun throughSBox(value : Int) : Int{
-        var hex = Integer.toHexString(value)
-        hex = padByte(hex)
-        val first = hex[0].fromHexToInt()
-        val second = hex[1].fromHexToInt()
-        return sBox[first][second]
-    }
-    private fun throughISBox(value : Int) : Int{
-        var hex = Integer.toHexString(value)
-        hex = padByte(hex)
-        val first = hex[0].fromHexToInt()
-        val second = hex[1].fromHexToInt()
-        return iSBox[first][second]
-    }
+
+
     fun plainTextToState(plainText : String, blocks : Int) : Array<Array<Array<Int>>>{
         /* Blocks + 1 in case the plainText is perfectly distributed to block.
-            In that case , the last block contains all the value of 0x10 to overcome
-            the confusing with the last byte of a block being 0x01
+            In that case , the last block contains all the value of 0x10 to prevent
+            confusing with the last x byte of the last block being all x
         */
         val res = Array(blocks+1){Array(4){Array(4){0} }}
         var count = 0
@@ -136,6 +124,20 @@ abstract class AES : EnDecAlgorithm {
         word[3] = temp
         return word
     }
+    private fun throughSBox(value : Int) : Int{
+        var hex = Integer.toHexString(value)
+        hex = padByte(hex)
+        val first = hex[0].fromHexToInt()
+        val second = hex[1].fromHexToInt()
+        return sBox[first][second]
+    }
+    private fun throughISBox(value : Int) : Int{
+        var hex = Integer.toHexString(value)
+        hex = padByte(hex)
+        val first = hex[0].fromHexToInt()
+        val second = hex[1].fromHexToInt()
+        return iSBox[first][second]
+    }
     fun subByte(byte : Int ) : Int{
         return throughSBox(byte)
     }
@@ -180,12 +182,7 @@ abstract class AES : EnDecAlgorithm {
         }
         return res
     }
-    fun xorWord(word1 : Array<Int>,word2 : Array<Int>) : Array<Int>{
-        for(i in 0 until 4){
-            word1[i] = word1[i] xor word2[i]
-        }
-        return word1
-    }
+
 
     fun keyExpansion(){
         for(i in 0 until keyLength/4){
@@ -250,6 +247,12 @@ abstract class AES : EnDecAlgorithm {
             }
         }
         return temp
+    }
+    fun xorWord(word1 : Array<Int>,word2 : Array<Int>) : Array<Int>{
+        for(i in 0 until 4){
+            word1[i] = word1[i] xor word2[i]
+        }
+        return word1
     }
     fun addRoundKey(state : Array<Array<Int>>,round : Int){
         for(i in 0 until 4){

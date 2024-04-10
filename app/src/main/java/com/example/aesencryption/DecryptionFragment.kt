@@ -7,6 +7,10 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import com.example.aesencryption.databinding.FragmentDecryptionBinding
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
 import java.io.File
 
 class DecryptionFragment : Fragment() {
@@ -38,13 +42,18 @@ class DecryptionFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         binding.apply{
             encryptButton.setOnClickListener{
-                val start = System.currentTimeMillis()
-                output.setText(aes.decrypt(inputEditText.text.toString()))
-                timeTaken.text = (System.currentTimeMillis()-start).toString()
+               CoroutineScope(Dispatchers.Main).launch {
+                   val start = System.currentTimeMillis()
+                   val plainText = async(Dispatchers.Default) {
+                       aes.decrypt(inputEditText.text.toString())
+                   }.await()
+                   output.setText(plainText)
+                   timeTaken.text = (System.currentTimeMillis()-start).toString()
+               }
             }
             save.setOnClickListener{
                 if(pickedFile != null){
-                    File("${requireContext().filesDir}/$encryptDir","$pickedFile-encrypt").apply {
+                    File("${requireContext().filesDir}/$encryptDir","$pickedFile-decrypt").apply {
                         if(exists()){
                             delete()
                         }

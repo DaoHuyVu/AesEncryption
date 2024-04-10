@@ -7,6 +7,11 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import com.example.aesencryption.databinding.FragmentEncryptionBinding
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
 import java.io.File
 
 class EncryptionFragment : Fragment() {
@@ -44,11 +49,15 @@ class EncryptionFragment : Fragment() {
             keySizePicker.onItemSelectedListener = spinnerListener{
                 aes.setKeySize(secretKeySize[it].toInt())
             }
-
             encryptButton.setOnClickListener{
-                val start = System.currentTimeMillis()
-                output.setText(aes.encrypt(inputEditText.text.toString()))
-                timeTaken.text = (System.currentTimeMillis()-start).toString()
+                CoroutineScope(Dispatchers.Main).launch{
+                    val start = System.currentTimeMillis()
+                    val cipherText = async(Dispatchers.Default) {
+                        aes.encrypt(inputEditText.text.toString())
+                    }.await()
+                    output.setText(cipherText)
+                    timeTaken.text = (System.currentTimeMillis()-start).toString()
+                }
             }
             save.setOnClickListener{
                 if(pickedFile != null){
