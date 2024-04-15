@@ -1,19 +1,21 @@
 package com.example.aesencryption
 
+import android.util.Log
 import kotlin.math.ceil
 
 class CBC : AES() {
-    private var initializationVector = Array(4){Array(4){0}}
+    private var _initializationVector = Array(4){Array(4){0}}
+    val initializerVector get() = _initializationVector
     init{
         keyExpansion()
     }
     override fun encrypt(plainText : String): String {
-        initializationVector = iV()
-        var iVTemp = initializationVector
+        _initializationVector = iV()
+        var iVTemp = _initializationVector
         val blocks = ceil(plainText.length/16.0).toInt()
         val state = plainTextToState(plainText,blocks)
         for(n in 0 until blocks){
-            // Cn = E(Kn,( Pn xor IVn))
+            // Cn = E(Kn,( Pn xor Cn-1))
             xor4Words(state[n],iVTemp)
             addRoundKey(state[n],0)
             for (i in 1 until numOfRound) {
@@ -31,14 +33,14 @@ class CBC : AES() {
         return cipherText(state,blocks+1)
     }
     override fun decrypt(cipherText: String): String {
-        var iVTemp = initializationVector
+        var iVTemp = _initializationVector
         val blocks =  cipherText.length/32
         val state = hexToState(cipherText,blocks)
         for(n in 0 until blocks-1){
-            // Store Cn
+            // Store Cn-1
             val temp = Array(4){Array(4){0}}
             copy(state[n],temp)
-            // Pn = IVn xor D(Kn,Cn)
+            // Pn = Cn-1 xor D(Kn,Cn)
             addRoundKey(state[n],numOfRound)
             for(i in numOfRound-1 downTo 1){
                 invShiftRow(state[n])

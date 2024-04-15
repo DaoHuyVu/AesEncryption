@@ -75,7 +75,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/output_layout"
             android:layout_margin="10dp"
-            android:text="@string/save_file"/>
+            android:text="@string/send_file"/>
     </LinearLayout>
     </ScrollView>
     <LinearLayout

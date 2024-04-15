@@ -6,7 +6,8 @@ abstract class AES : EnDecAlgorithm {
     // 16 bytes 0f1571c947d9e8590cb7add6af7f6798
     // 24 bytes 8e73b0f7da0e6452c810f32b809079e562f8ead2522c6b7b
     // 32 bytes ec26d4ee1eccbda8b659cbb1220a94c9491e7386ea9b53930001e49f165c57b2
-    private var secretKey = "0f1571c947d9e8590cb7add6af7f6798"
+    private var _secretKey = "0f1571c947d9e8590cb7add6af7f6798"
+    val secretKey get() = _secretKey
     private val secretKeyMap = mapOf(
         128 to "0f1571c947d9e8590cb7add6af7f6798",
         192 to "8e73b0f7da0e6452c810f32b809079e562f8ead2522c6b7b",
@@ -15,18 +16,16 @@ abstract class AES : EnDecAlgorithm {
     private val numOfRoundKeyMap = mapOf(16 to 44,24 to 52,32 to 60)
     private val roundMap = mapOf(16 to 10,24 to 12,32 to 14)
 
-    private var keyLength = secretKey.length/2
+    private var keyLength = _secretKey.length/2
     protected var numOfRound = roundMap[keyLength]!!
     private var word = Array(numOfRoundKeyMap[keyLength]!!){Array(4){0} }
     fun setKeySize(size : Int){
-        secretKey = secretKeyMap[size]!!
-        keyLength = secretKey.length/2
+        _secretKey = secretKeyMap[size]!!
+        keyLength = _secretKey.length/2
         numOfRound = roundMap[keyLength]!!
-        word =  Array(numOfRoundKeyMap[keyLength]!!){Array(4){0} }
+        word = Array(numOfRoundKeyMap[keyLength]!!){Array(4){0} }
+        keyExpansion()
     }
-
-
-
     fun plainTextToState(plainText : String, blocks : Int) : Array<Array<Array<Int>>>{
         /* Blocks + 1 in case the plainText is perfectly distributed to block.
             In that case , the last block contains all the value of 0x10 to prevent
@@ -116,10 +115,10 @@ abstract class AES : EnDecAlgorithm {
         return res
     }
     // Perform n-byte circular left shift on a word
-    fun rotWord(word : Array<Int>,degree : Int ) : Array<Int>{
+    private fun rotWord(word : Array<Int>) : Array<Int>{
         val temp = word[0]
         for(i in 0 until 3){
-            word[i] = word[i+degree]
+            word[i] = word[i+1]
         }
         word[3] = temp
         return word
@@ -183,21 +182,31 @@ abstract class AES : EnDecAlgorithm {
         return res
     }
 
-
+    fun copyWord(a : Array<Int>,b : Array<Int>) {
+        for(i in 0 until 4){
+            a[i] = b[i]
+        }
+    }
     fun keyExpansion(){
         for(i in 0 until keyLength/4){
             for(j in 0 until 4){
-                word[i][j] = "${secretKey[2*(4*i+j)]}${secretKey[2*(4*i+j)+1]}".toInt(16)
+                word[i][j] = "${_secretKey[2*(4*i+j)]}${_secretKey[2*(4*i+j)+1]}".toInt(16)
             }
         }
+
         for(i in keyLength/4 until numOfRoundKeyMap[keyLength]!!){
             for(j in 0 until 4){
-                var temp = word[i-1]
+                var temp = Array(4){0}
+                copyWord(temp,word[i-1])
                 if(i%(keyLength/4) == 0){
-                    temp = rCon(subWord(rotWord(temp,1)),i/(keyLength/4))
+                    temp = rCon(subWord(rotWord(temp)),i/(keyLength/4))
                 }
                 word[i] = xorWord(temp,word[i-(keyLength/4)])
             }
+        }
+        for(j in 0 until 44){
+            val i = 0
+            Log.i("word[$] ","${word[j][i] } ${word[j][i+1] } ${word[j][i+2] } ${word[j][i+3] }")
         }
     }
     fun shiftRow(state : Array<Array<Int>>) {
@@ -210,7 +219,6 @@ abstract class AES : EnDecAlgorithm {
                 for(j in 0 until 3){
                     state[j][i] = state[j+1][i]
                 }
-
                 state[3][i] = temp
             }
         }

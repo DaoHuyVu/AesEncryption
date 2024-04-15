@@ -1,6 +1,7 @@
 package com.example.aesencryption
 
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -10,10 +11,8 @@ import com.example.aesencryption.databinding.FragmentEncryptionBinding
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import java.io.File
-
 class EncryptionFragment : Fragment() {
     private val aes = AesWrapper.getInstance()
     private lateinit var encryptDir : String
@@ -21,7 +20,6 @@ class EncryptionFragment : Fragment() {
     private var _binding : FragmentEncryptionBinding? = null
     private val binding get() =  _binding!!
     private val secretKeySize = listOf("128","192","256")
-    private var pickedFile: String? = null
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -50,29 +48,21 @@ class EncryptionFragment : Fragment() {
                 aes.setKeySize(secretKeySize[it].toInt())
             }
             encryptButton.setOnClickListener{
+
                 CoroutineScope(Dispatchers.Main).launch{
-                    val start = System.currentTimeMillis()
                     val cipherText = async(Dispatchers.Default) {
                         aes.encrypt(inputEditText.text.toString())
                     }.await()
                     output.setText(cipherText)
-                    timeTaken.text = (System.currentTimeMillis()-start).toString()
                 }
             }
-            save.setOnClickListener{
-                if(pickedFile != null){
-                    File("${requireContext().filesDir}/$decryptDir","$pickedFile-encrypt").apply {
-                        if(exists()){
-                            delete()
-                        }
-                        if(createNewFile()){
-                            writeText(output.text.toString())
-                            Toast.makeText(requireContext(),"Added to Decrypt directory", Toast.LENGTH_SHORT).show()
-                        }
-                        else{
-                            Toast.makeText(requireContext(),"Add failed", Toast.LENGTH_SHORT).show()
-                        }
-                    }
+            send.setOnClickListener{
+                if(output.text?.isEmpty() == false){
+                    SendFileDialogFragment { writer ->
+                        writer.println(AesWrapper.getSecreteKey())
+                        writer.println(AesWrapper.getIV())
+                        writer.println(output.text)
+                    }.show(childFragmentManager,"SendFileDialogFragment")
                 }
                 else{
                     Toast.makeText(requireContext(),"Pick a file first",Toast.LENGTH_SHORT).show()
@@ -80,11 +70,11 @@ class EncryptionFragment : Fragment() {
             }
             openFolder.setOnClickListener{
                 FileChooserBottomSheetFragment(ENCRYPT_DIR){ fileName ->
-                    pickedFile = fileName
                     inputEditText.setText(getFileContent(encryptDir,fileName))
                 }.show(childFragmentManager,"BottomFragment")
             }
         }
+        
     }
 
     override fun onDestroy() {

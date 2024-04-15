@@ -7,7 +7,7 @@
     <string name="open_folder">Open folder</string>
     <string name="add_file">Add file</string>
     <string name="choose_secret_key_size">Choose secret key size</string>
-    <string name="save_file">Save file</string>
+    <string name="send_file">Send file</string>
     <string name="plaintext">Plaintext</string>
     <string name="ciphertext">Ciphertext</string>
     <string name="choose_file">Choose file</string>
@@ -16,4 +16,7 @@
     <string name="delete_file">delete_file</string>
     <string name ="file_name">File name</string>
     <string name="file_content">File content</string>
+    <string name="address">Address</string>
+    <string name="port">Port</string>
+    <string name="send">Send</string>
 </resources>
