@@ -34,37 +34,7 @@ class SendFileDialogFragment(
         binding.apply {
             send.setOnClickListener {
                 if(addressInput.text != null && portInput.text != null){
-                    CoroutineScope(Dispatchers.IO).launch {
-                        val socket = Socket()
-                        try{
-                            socket.connect(
-                                InetSocketAddress(
-                                    addressInput.text.toString(),
-                                    portInput.text.toString().toInt()
-                                )
-                            )
-                            if (socket.isConnected) {
-                                sendFile.invoke(PrintWriter(socket.getOutputStream(),true))
-                                withContext(Dispatchers.Main) {
-                                    Toast.makeText(requireContext(),"Sent",Toast.LENGTH_SHORT).show()
-                                }
-                            }
-                            else {
-                                withContext(Dispatchers.Main) {
-                                    Toast.makeText(
-                                        requireContext(),
-                                        "Connect failed",
-                                        Toast.LENGTH_SHORT
-                                    ).show()
-                                }
-                            }
-                        }catch (ex : Exception){
-                            ex.printStackTrace()
-                        }
-                        finally {
-                            socket.close()
-                        }
-                    }
+
                 }
                 else{
                     Toast.makeText(requireContext(),"Fill in all information",Toast.LENGTH_SHORT).show()

@@ -12,14 +12,22 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
+import java.io.PrintWriter
+import java.net.InetSocketAddress
+import java.net.Socket
+
 class EncryptionFragment : Fragment() {
     private val aes = AesWrapper.getInstance()
     private lateinit var encryptDir : String
     private lateinit var decryptDir : String
     private var _binding : FragmentEncryptionBinding? = null
     private val binding get() =  _binding!!
+    private val address = "localhost"
+    private val port = 50000
     private val secretKeySize = listOf("128","192","256")
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -58,14 +66,40 @@ class EncryptionFragment : Fragment() {
             }
             send.setOnClickListener{
                 if(output.text?.isEmpty() == false){
-                    SendFileDialogFragment { writer ->
-                        writer.println(AesWrapper.getSecreteKey())
-                        writer.println(AesWrapper.getIV())
-                        writer.println(output.text)
-                    }.show(childFragmentManager,"SendFileDialogFragment")
+                    CoroutineScope(Dispatchers.IO).launch {
+                        val socket = Socket()
+                        try{
+                            socket.connect(
+                                InetSocketAddress(address,port)
+                            )
+                            if (socket.isConnected) {
+                                val writer = PrintWriter(socket.getOutputStream(),true)
+                                writer.println(AesWrapper.getSecreteKey())
+                                writer.println(AesWrapper.getIV())
+                                writer.println(output.text)
+                                withContext(Dispatchers.Main) {
+                                    Toast.makeText(requireContext(),"Sent",Toast.LENGTH_SHORT).show()
+                                }
+                            }
+                            else {
+                                withContext(Dispatchers.Main) {
+                                    Toast.makeText(
+                                        requireContext(),
+                                        "Connect failed",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                }
+                            }
+                        }catch (ex : Exception){
+                            ex.printStackTrace()
+                        }
+                        finally {
+                            socket.close()
+                        }
+                    }
                 }
                 else{
-                    Toast.makeText(requireContext(),"Pick a file first",Toast.LENGTH_SHORT).show()
+                    Toast.makeText(requireContext(),"Cipher text field is empty",Toast.LENGTH_SHORT).show()
                 }
             }
             openFolder.setOnClickListener{
